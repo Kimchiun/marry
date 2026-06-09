@@ -12,7 +12,8 @@ import { useEffect, useRef, useState } from "react"
 import HeartIcon from "../../icons/heart-icon.svg?react"
 import CalendarIcon from "../../icons/calendar-icon.svg?react"
 import MarkerIcon from "../../icons/marker-icon.svg?react"
-import { SERVER_URL } from "../../env"
+import { createAttendance } from "../../lib/attendance"
+import { HAS_SUPABASE } from "../../lib/supabase"
 
 /**
  * 입력 데이터 제한 규칙
@@ -44,13 +45,13 @@ export const AttendanceInfo = () => {
     initialized.current = true
 
     // 서버 URL이 없거나 예식일이 지났으면 안내 모달을 띄우지 않음
-    if (!SERVER_URL || WEDDING_DATE.isBefore(now.current)) return
+    if (!HAS_SUPABASE || WEDDING_DATE.isBefore(now.current)) return
 
     attendanceInfoModalState[1](true)
   }, [attendanceInfoModalState])
 
   // 서버 연동 기능이 비활성화되어 있거나 이미 예식이 종료된 경우 섹션을 렌더링하지 않음
-  if (!SERVER_URL || WEDDING_DATE.isBefore(now.current)) return null
+  if (!HAS_SUPABASE || WEDDING_DATE.isBefore(now.current)) return null
 
   return (
     <>
@@ -209,16 +210,7 @@ const AttendanceFormModal = ({ onClose }: { onClose: () => void }) => {
           }
 
           // 서버에 데이터 전송
-          const res = await fetch(`${SERVER_URL}/attendance`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ side, name, meal, count }),
-          })
-          if (!res.ok) {
-            throw new Error(res.statusText)
-          }
+          await createAttendance(side, name, meal, count)
 
           alert("참석 의사가 성공적으로 전달되었습니다.")
           onClose()

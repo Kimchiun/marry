@@ -3,8 +3,13 @@ import { Button } from "../button"
 import { dayjs } from "../../const"
 import { LazyDiv } from "../lazyDiv"
 import { Modal } from "../modal"
-import offlineGuestBook from "./offlineGuestBook.json"
-import { SERVER_URL } from "../../env"
+import {
+  createGuestbookPost,
+  deleteGuestbookPost,
+  getGuestbookPosts,
+  type Post,
+} from "../../lib/guestbook"
+import { HAS_SUPABASE } from "../../lib/supabase"
 
 /**
  * 방명록 입력 규칙 설정
@@ -26,16 +31,6 @@ const PAGES_PER_BLOCK = 5
 const POSTS_PER_PAGE = 5
 
 /**
- * 방명록 게시물 타입 정의
- */
-type Post = {
-  id: number
-  timestamp: number
-  name: string
-  content: string
-}
-
-/**
  * 방명록 섹션 컴포넌트입니다.
  * 최근 게시물을 표시하고, 작성/전체보기/삭제 기능을 제공합니다.
  *
@@ -44,31 +39,22 @@ type Post = {
 export const GuestBook = () => {
   const [posts, setPosts] = useState<Post[]>([])
 
-  // 모달 상태 관리
   const guestbookListModalState = useState(false)
   const deleteGuestBookModalState = useState(false)
   const [deletePostId, setDeletePostId] = useState<number | null>(null)
   const writeGuestBookModalState = useState(false)
 
-  /**
-   * 서버 또는 로컬 파일에서 방명록 게시물을 불러옵니다.
-   */
   const loadPosts = async () => {
-    if (SERVER_URL) {
-      try {
-        const res = await fetch(
-          `${SERVER_URL}/guestbook?offset=${0}&limit=${3}`,
-        )
-        if (res.ok) {
-          const data = await res.json()
-          setPosts(data.posts)
-        }
-      } catch (error) {
-        console.error("Error loading posts:", error)
-      }
-    } else {
-      // 서버가 없는 경우 로컬 JSON 파일에서 데이터를 가져옵니다.
-      setPosts(offlineGuestBook.slice(0, 3))
+    if (!HAS_SUPABASE) {
+      setPosts([])
+      return
+    }
+
+    try {
+      const data = await getGuestbookPosts(0, 3)
+      setPosts(data.posts)
+    } catch (error) {
+      console.error("Error loading posts:", error)
     }
   }
 
@@ -83,14 +69,13 @@ export const GuestBook = () => {
 
         <div className="break" />
 
-        {/* 게시물 목록 표시 */}
         {posts.map((post) => (
           <div key={post.id} className="post">
             <div className="heading">
               <button
                 className="close-button"
                 onClick={async () => {
-                  if (SERVER_URL) {
+                  if (HAS_SUPABASE) {
                     setDeletePostId(post.id)
                     deleteGuestBookModalState[1](true)
                   }
@@ -111,8 +96,7 @@ export const GuestBook = () => {
 
         <div className="break" />
 
-        {/* 방명록 작성 버튼 (서버 URL이 있을 때만 표시) */}
-        {SERVER_URL && (
+        {HAS_SUPABASE && (
           <>
             <Button onClick={() => writeGuestBookModalState[1](true)}>
               방명록 작성하기
@@ -126,7 +110,6 @@ export const GuestBook = () => {
         </Button>
       </LazyDiv>
 
-      {/* 방명록 전체보기 모달 */}
       <Modal
         modalState={guestbookListModalState}
         className="guestbook-list-modal"
@@ -138,7 +121,6 @@ export const GuestBook = () => {
         />
       </Modal>
 
-      {/* 방명록 삭제 모달 */}
       <Modal
         modalState={deleteGuestBookModalState}
         className="delete-guestbook-modal"
@@ -156,7 +138,6 @@ export const GuestBook = () => {
         />
       </Modal>
 
-      {/* 방명록 작성 모달 */}
       <Modal
         modalState={writeGuestBookModalState}
         className="write-guestbook-modal"
@@ -171,9 +152,6 @@ export const GuestBook = () => {
   )
 }
 
-/**
- * 방명록 작성을 위한 모달 컴포넌트입니다.
- */
 const WriteGuestBookModal = ({
   loadPosts,
   onClose,
@@ -199,7 +177,6 @@ const WriteGuestBookModal = ({
           const content = inputRef.current.content.value.trim()
           const password = inputRef.current.password.value
 
-          // 유효성 검사
           if (!name) {
             alert("이름을 입력해주세요.")
             return
@@ -223,17 +200,7 @@ const WriteGuestBookModal = ({
             return
           }
 
-          // 서버에 데이터 전송
-          const res = await fetch(`${SERVER_URL}/guestbook`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ name, content, password }),
-          })
-          if (!res.ok) {
-            throw new Error(res.statusText)
-          }
+          await createGuestbookPost(name, content, password)
 
           alert("방명록 작성이 완료되었습니다.")
           onClose()
@@ -301,9 +268,6 @@ const WriteGuestBookModal = ({
   )
 }
 
-/**
- * 방명록 목록을 페이지네이션과 함께 표시하는 모달 컴포넌트입니다.
- */
 const GuestBookListModal = ({
   loadPosts,
   onClose,
@@ -318,41 +282,29 @@ const GuestBookListModal = ({
   const deleteGuestBookModalState = useState(false)
   const [deletePostId, setDeletePostId] = useState<number | null>(null)
 
-  /**
-   * 특정 페이지의 데이터를 로드합니다.
-   *
-   * @param {number} page - 불러올 페이지 번호
-   */
   const loadPage = useCallback(async (page: number) => {
     setCurrentPage(page)
-    if (SERVER_URL) {
-      try {
-        const offset = page * POSTS_PER_PAGE
-        const res = await fetch(
-          `${SERVER_URL}/guestbook?offset=${offset}&limit=${POSTS_PER_PAGE}`,
-        )
-        if (res.ok) {
-          const data = await res.json()
-          const totalPages = Math.ceil(data.total / POSTS_PER_PAGE)
-          if (page !== 0 && page >= totalPages) {
-            loadPage(totalPages - 1)
-            return
-          }
-          setPosts(data.posts)
-          setTotalPages(totalPages)
-        }
-      } catch (error) {
-        console.error("Error loading posts:", error)
+
+    if (!HAS_SUPABASE) {
+      setPosts([])
+      setTotalPages(1)
+      return
+    }
+
+    try {
+      const offset = page * POSTS_PER_PAGE
+      const data = await getGuestbookPosts(offset, POSTS_PER_PAGE)
+      const totalPages = Math.max(1, Math.ceil(data.total / POSTS_PER_PAGE))
+
+      if (page !== 0 && page >= totalPages) {
+        loadPage(totalPages - 1)
+        return
       }
-    } else {
-      // 서버가 없는 경우 로컬 데이터 사용
-      setPosts(
-        offlineGuestBook.slice(
-          page * POSTS_PER_PAGE,
-          (page + 1) * POSTS_PER_PAGE,
-        ),
-      )
-      setTotalPages(Math.ceil(offlineGuestBook.length / POSTS_PER_PAGE))
+
+      setPosts(data.posts)
+      setTotalPages(totalPages)
+    } catch (error) {
+      console.error("Error loading posts:", error)
     }
   }, [])
 
@@ -360,7 +312,6 @@ const GuestBookListModal = ({
     loadPage(0)
   }, [loadPage])
 
-  // 표시할 페이지 번호 계산
   const pages = useMemo(() => {
     const start = Math.floor(currentPage / PAGES_PER_BLOCK) * PAGES_PER_BLOCK
     const end = Math.min(start + PAGES_PER_BLOCK, totalPages)
@@ -379,7 +330,7 @@ const GuestBookListModal = ({
               <div
                 className="close-button"
                 onClick={async () => {
-                  if (SERVER_URL) {
+                  if (HAS_SUPABASE) {
                     setDeletePostId(post.id)
                     deleteGuestBookModalState[1](true)
                   }
@@ -400,7 +351,6 @@ const GuestBookListModal = ({
 
         <div className="break" />
 
-        {/* 페이지네이션 컨트롤 */}
         <div className="pagination">
           {pages[0] > 0 && (
             <div className="page" onClick={() => loadPage(pages[0] - 1)}>
@@ -459,9 +409,6 @@ const GuestBookListModal = ({
   )
 }
 
-/**
- * 방명록 삭제를 위해 비밀번호를 입력받는 모달 컴포넌트입니다.
- */
 const DeleteGuestBookModal = ({
   postId,
   onSuccess,
@@ -489,26 +436,16 @@ const DeleteGuestBookModal = ({
             return
           }
 
-          // 서버에 삭제 요청 전송
-          const result = await fetch(`${SERVER_URL}/guestbook`, {
-            method: "PUT", // 서버 설계에 따라 DELETE 대신 PUT으로 비밀번호 확인을 포함한 삭제를 처리할 수 있음
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: postId, password }),
-          })
-
-          if (!result.ok) {
-            if (result.status === 403) {
-              alert("비밀번호가 일치하지 않습니다.")
-            } else {
-              alert("방명록 삭제에 실패했습니다.")
-            }
-            return
-          }
+          await deleteGuestbookPost(postId, password)
 
           alert("삭제되었습니다.")
           onSuccess()
-        } catch {
-          alert("방명록 삭제에 실패했습니다.")
+        } catch (error) {
+          if (error instanceof Error && error.message === "FORBIDDEN") {
+            alert("비밀번호가 일치하지 않습니다.")
+          } else {
+            alert("방명록 삭제에 실패했습니다.")
+          }
         } finally {
           setLoading(false)
         }

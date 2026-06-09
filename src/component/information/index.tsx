@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { BRIDE_INFO, GROOM_INFO } from "../../const"
-import { STATIC_ONLY } from "../../env"
+import { HAS_SUPABASE } from "../../lib/supabase"
 import { Button } from "../button"
 import { LazyDiv } from "../lazyDiv"
 import { Modal } from "../modal"
@@ -129,8 +129,8 @@ export const Information2 = () => {
  * @returns {JSX.Element} 정보 안내 섹션
  */
 export const Information = () => {
-  // 정적 모드일 경우 참석 의사 전달 기능을 제외합니다.
-  if (STATIC_ONLY) {
+  // Supabase가 연결되지 않은 경우 참석 의사 전달 기능을 제외합니다.
+  if (!HAS_SUPABASE) {
     return (
       <>
         <LazyDiv className="card information">

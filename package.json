@@ -5,7 +5,7 @@
   "author": "Ju Ho Nam <jhnamnam@gmail.com> (https://juhonamnam.github.io/)",
   "license": "MIT",
   "private": true,
-  "homepage": "https://kimchiun.github.io/marry",
+  "homepage": "https://marry.vercel.app",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,6 +14,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.108.0",
     "@types/node": "^24.0.15",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
