@@ -1,22 +1,39 @@
 .invitation {
   .content {
-    margin-top: 0.8rem;
-    margin-bottom: 0.8rem;
-    font-size: 0.9rem;
+    margin-top: 0.55rem;
+    margin-bottom: 0.55rem;
+    font-size: 0.92rem;
+    line-height: 1.9;
+    letter-spacing: 0.02rem;
+    word-break: keep-all;
   }
 
-  .name {
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
+  .family-names {
+    display: grid;
+    grid-template-columns: max-content auto max-content auto max-content;
+    justify-content: center;
+    column-gap: 0.35rem;
+    row-gap: 0.6rem;
+    margin: 1.2rem 0;
+    font-size: 1.15rem;
+    line-height: 1.6;
+
+    .name-row {
+      display: contents;
+    }
+
+    .father {
+      text-align: right;
+    }
+
+    .dot {
+      opacity: 0.5;
+    }
+
     .relation {
       font-size: 0.75rem;
-      opacity: 0.7;
-
-      .relation-name {
-        display: inline-block;
-        min-width: 2em;
-      }
+      opacity: 0.65;
+      white-space: nowrap;
     }
   }
 }

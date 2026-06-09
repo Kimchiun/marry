@@ -23,10 +23,10 @@ function App() {
       {/* 배경 애니메이션 효과 (예: 꽃잎 내리기) */}
       <BGEffect />
       <div className="card-view">
-        <LazyDiv className="card-group">
-          {/* 메인 커버 섹션 */}
-          <Cover />
+        {/* 메인 커버 섹션 (풀스크린) */}
+        <Cover />
 
+        <LazyDiv className="card-group">
           {/* 모시는 글 섹션 */}
           <Invitation />
         </LazyDiv>

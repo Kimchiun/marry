@@ -33,34 +33,40 @@ export const Invitation = () => {
         <div className="break" />
 
         {/* 초대 문구 */}
-        <div className="content">싱그러운 여름 향기 가득한 날</div>
-        <div className="content">소중한 분들을 모시고</div>
-        <div className="content">사랑의 약속을 하려고 합니다.</div>
+        <div className="content">높고 푸른 가을 하늘 아래</div>
+        <div className="content">시원한 바람을 닮은 서로의 곁에서</div>
+        <div className="content">새로운 시작을 약속하려 합니다.</div>
         <div className="break" />
-        <div className="content">햇살이 뜨거울 땐 가려주고,</div>
-        <div className="content">비가 오면 우산이 되어주는</div>
-        <div className="content">부부가 되겠습니다.</div>
+        <div className="content">맑게 갠 가을날처럼 밝은 웃음으로,</div>
+        <div className="content">가을 들판처럼 넓은 마음으로</div>
+        <div className="content">서로를 채워가는 부부가 되겠습니다.</div>
         <div className="break" />
-        <div className="content">기쁜날 함께 하시어</div>
-        <div className="content">저희의 앞날을 축복해 주세요.</div>
+        <div className="content">좋은 날, 소중한 분들을 모시고</div>
+        <div className="content">감사와 축복 속에 첫 발을 내딛고자 하오니</div>
+        <div className="content">오셔서 기쁜 자리를 빛내주시기 바랍니다.</div>
 
         <div className="break" />
 
-        {/* 혼주 및 신랑 정보 */}
-        <div className="name">
-          {GROOM_FATHER} · {GROOM_MOTHER}
-          <span className="relation">
-            의 <span className="relation-name">{GROOM_TITLE}</span>
-          </span>{" "}
-          {GROOM_FULLNAME}
-        </div>
-        {/* 혼주 및 신부 정보 */}
-        <div className="name">
-          {BRIDE_FATHER} · {BRIDE_MOTHER}
-          <span className="relation">
-            의 <span className="relation-name">{BRIDE_TITLE}</span>
-          </span>{" "}
-          {BRIDE_FULLNAME}
+        {/* 혼주 및 신랑·신부 정보 */}
+        <div className="family-names">
+          <div className="name-row">
+            <span className="father">{GROOM_FATHER}</span>
+            <span className="dot">·</span>
+            <span className="mother">{GROOM_MOTHER}</span>
+            <span className="relation">
+              의 <span className="relation-name">{GROOM_TITLE}</span>
+            </span>
+            <span className="child">{GROOM_FULLNAME}</span>
+          </div>
+          <div className="name-row">
+            <span className="father">{BRIDE_FATHER}</span>
+            <span className="dot">·</span>
+            <span className="mother">{BRIDE_MOTHER}</span>
+            <span className="relation">
+              의 <span className="relation-name">{BRIDE_TITLE}</span>
+            </span>
+            <span className="child">{BRIDE_FULLNAME}</span>
+          </div>
         </div>
 
         <div className="break" />

@@ -3,56 +3,57 @@ import {
   GROOM_FULLNAME,
   LOCATION,
   WEDDING_DATE,
-  WEDDING_DATE_FORMAT,
 } from "../../const"
 import { COVER_IMAGE } from "../../images"
-import { LazyDiv } from "../lazyDiv"
-
-const DAY_OF_WEEK = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-]
 
 /**
- * 초대장의 메인 커버 섹션입니다.
- * 예식 일시, 신랑/신부 이름, 장소를 표시합니다.
+ * 초대장의 메인 커버 섹션입니다. (전체 화면 적용)
+ * 예식 일시, 신랑/신부 이름, 장소를 풀스크린 배경 사진 위에 표시합니다.
  *
  * @returns {JSX.Element} 커버 섹션
  */
 export const Cover = () => {
   return (
-    <LazyDiv className="card cover">
-      {/* 상단 날짜 표시 */}
-      <div className="wedding-date">
-        {WEDDING_DATE.format("YYYY")}
-        <div className="divider" />
-        {WEDDING_DATE.format("MM")}
-        <div className="divider" />
-        {WEDDING_DATE.format("DD")}
+    <div className="cover-fullscreen">
+      {/* 배경 이미지 및 어두운 그라데이션 오버레이 */}
+      <div className="bg-image-container">
+        <img src={COVER_IMAGE} className="bg-image" alt="Wedding Cover" />
+        <div className="cover-overlay" />
       </div>
-      {/* 요일 표시 (영어) */}
-      <div className="wedding-day-of-week">
-        {DAY_OF_WEEK[WEDDING_DATE.day()]}
+
+      {/* 상단 타이틀 영역 */}
+      <div className="cover-header">
+        <div className="wedding-date-top">
+          <span>{WEDDING_DATE.format("YYYY")}</span>
+          <span className="dot">.</span>
+          <span>{WEDDING_DATE.format("MM")}</span>
+          <span className="dot">.</span>
+          <span>{WEDDING_DATE.format("DD")}</span>
+        </div>
+        <h1 className="wedding-title">THE WEDDING</h1>
       </div>
-      {/* 커버 이미지 */}
-      <div className="image-wrapper">
-        <img src={COVER_IMAGE} alt="sample" />
+
+      {/* 하단 정보 영역 */}
+      <div className="cover-footer">
+        <div className="names-container">
+          <span className="name groom">{GROOM_FULLNAME}</span>
+          <span className="and">&</span>
+          <span className="name bride">{BRIDE_FULLNAME}</span>
+        </div>
+        <div className="divider-line" />
+        <div className="wedding-meta">
+          <div className="date-string">
+            {WEDDING_DATE.format("YYYY년 M월 D일 A h시")}
+          </div>
+          <div className="location-string">{LOCATION}</div>
+        </div>
       </div>
-      <div className="subtitle">Save the date for the wedding of</div>
-      {/* 이름 표시 */}
-      <div className="names">
-        {GROOM_FULLNAME}
-        <div className="divider" />
-        {BRIDE_FULLNAME}
+
+      {/* 스크롤 안내 */}
+      <div className="scroll-indicator">
+        <span className="scroll-text">SCROLL DOWN</span>
+        <div className="bounce-arrow">▼</div>
       </div>
-      {/* 예식 정보 (포맷팅된 날짜 및 장소) */}
-      <div className="info">{WEDDING_DATE.format(WEDDING_DATE_FORMAT)}</div>
-      <div className="info">{LOCATION}</div>
-    </LazyDiv>
+    </div>
   )
 }
